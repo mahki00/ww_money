@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>용돈 계산기</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#fdf8f0;--surface:#fff;--surface2:#fdf4e4;--primary:#e67e22;--primary-dk:#c0620e;--primary-lt:#fef0dc;--green:#27ae60;--red:#e74c3c;--text:#1a1610;--text2:#6b5f4a;--text3:#aaa090;--border:#ede5d5;--r:12px;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+.header{background:linear-gradient(135deg,#f39c12,#e67e22);padding:0 24px;box-shadow:0 2px 12px rgba(230,126,34,.3);}
+.header-inner{max-width:1040px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:62px;gap:12px;}
+.logo{display:flex;align-items:center;gap:10px;}
+.logo-icon{font-size:26px;}
+.logo-text{font-size:18px;font-weight:700;color:#fff;letter-spacing:-.02em;}
+.logo-sub{font-size:12px;color:rgba(255,255,255,.75);margin-left:6px;font-weight:400;}
+.header-btns{display:flex;gap:8px;}
+.btn{font-family:'Noto Sans KR',sans-serif;font-size:13px;font-weight:500;padding:7px 14px;border-radius:8px;border:none;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:5px;white-space:nowrap;}
+.btn-glass{background:rgba(255,255,255,.18);color:#fff;border:1px solid rgba(255,255,255,.3);}
+.btn-glass:hover{background:rgba(255,255,255,.28);}
+.btn-orange{background:var(--primary);color:#fff;}
+.btn-orange:hover{background:var(--primary-dk);}
+.btn-green{background:var(--green);color:#fff;}
+.btn-green:hover{background:#219a52;}
+.controls{background:var(--surface);border-bottom:1px solid var(--border);padding:12px 24px;position:sticky;top:0;z-index:50;}
+.controls-inner{max-width:1040px;margin:0 auto;display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+.month-nav{display:flex;align-items:center;gap:8px;}
+.nav-btn{width:34px;height:34px;border-radius:8px;border:1px solid var(--border);background:var(--surface);cursor:pointer;font-size:18px;color:var(--text2);display:flex;align-items:center;justify-content:center;}
+.nav-btn:hover{background:var(--primary-lt);color:var(--primary);}
+.month-label{font-size:18px;font-weight:700;letter-spacing:-.02em;min-width:110px;text-align:center;}
+.goal-wrap{display:flex;align-items:center;gap:8px;margin-left:auto;}
+.goal-lbl{font-size:13px;color:var(--text2);}
+.goal-inp{font-family:'DM Mono',monospace;font-size:14px;font-weight:500;color:var(--primary);border:1px solid var(--border);border-radius:8px;padding:6px 10px;width:110px;outline:none;background:var(--bg);text-align:right;}
+.goal-inp:focus{border-color:var(--primary);}
+.goal-unit{font-size:13px;color:var(--text2);}
+.body-wrap{max-width:1040px;margin:20px auto 48px;padding:0 24px;}
+.task-panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:16px 20px;margin-bottom:16px;}
+.panel-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.panel-title{font-size:13px;font-weight:500;color:var(--text2);}
+.panel-hint{font-size:11px;color:var(--text3);margin-left:6px;font-weight:400;}
+.task-rows{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+@media(max-width:500px){.task-rows{grid-template-columns:1fr;}}
+.task-row{display:flex;align-items:center;gap:10px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:9px 14px;flex-wrap:wrap;}
+.emoji-btn{font-size:22px;cursor:pointer;border:none;background:none;padding:0 2px;line-height:1;transition:transform .15s;}
+.emoji-btn:hover{transform:scale(1.2);}
+.task-name-inp{font-family:'Noto Sans KR',sans-serif;font-size:13px;font-weight:500;color:var(--text);border:none;border-bottom:1px dashed var(--border);background:transparent;outline:none;width:120px;padding:2px 0;}
+.task-name-inp:focus{border-bottom-color:var(--primary);}
+.fl{font-size:11px;color:var(--text3);}
+.task-num-inp{font-family:'DM Mono',monospace;font-size:14px;font-weight:500;color:var(--primary-dk);border:1px solid var(--border);border-radius:7px;padding:4px 8px;width:72px;outline:none;background:var(--surface);text-align:right;}
+.task-max-inp{font-family:'DM Mono',monospace;font-size:14px;font-weight:500;color:#2980b9;border:1px solid var(--border);border-radius:7px;padding:4px 8px;width:52px;outline:none;background:var(--surface);text-align:right;}
+.task-num-inp:focus,.task-max-inp:focus{border-color:var(--primary);}
+.del-btn{margin-left:auto;font-size:17px;color:var(--text3);border:none;background:none;cursor:pointer;line-height:1;padding:3px 7px;border-radius:6px;transition:all .15s;}
+.del-btn:hover{color:var(--red);background:#fff0ee;}
+.emoji-picker{position:fixed;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:12px;box-shadow:0 8px 32px rgba(0,0,0,.15);z-index:200;display:none;flex-wrap:wrap;gap:4px;max-width:260px;}
+.emoji-picker.open{display:flex;}
+.emoji-opt{font-size:22px;cursor:pointer;padding:4px 6px;border-radius:6px;border:none;background:none;}
+.emoji-opt:hover{background:var(--primary-lt);}
+.sum-top{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;margin-bottom:12px;}
+@media(max-width:680px){.sum-top{grid-template-columns:1fr 1fr;}}
+.sum-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px 18px;}
+.sum-card.big{background:linear-gradient(135deg,#f39c12,#e67e22);border:none;}
+.sum-lbl{font-size:11px;color:var(--text3);letter-spacing:.04em;margin-bottom:5px;}
+.sum-card.big .sum-lbl{color:rgba(255,255,255,.75);}
+.sum-val{font-size:22px;font-weight:700;font-family:'DM Mono',monospace;color:var(--text);}
+.sum-card.big .sum-val{color:#fff;font-size:26px;}
+.sum-sub{font-size:11px;color:var(--text3);margin-top:3px;}
+.sum-card.big .sum-sub{color:rgba(255,255,255,.65);}
+.progress-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:16px 20px;margin-bottom:14px;}
+.progress-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+.progress-title{font-size:14px;font-weight:500;}
+.progress-pct{font-size:18px;font-weight:700;font-family:'DM Mono',monospace;color:var(--primary);}
+.progress-bar-bg{height:16px;background:var(--border);border-radius:8px;overflow:hidden;}
+.progress-bar{height:100%;background:linear-gradient(90deg,#f39c12,#e67e22);border-radius:8px;transition:width .4s ease;}
+.progress-sub{display:flex;justify-content:space-between;margin-top:6px;font-size:11px;color:var(--text3);}
+.item-sum{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;}
+.item-badge{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;display:flex;align-items:center;gap:6px;}
+.ib-cnt{font-family:'DM Mono',monospace;font-weight:500;color:var(--primary);}
+.ib-pay{font-family:'DM Mono',monospace;font-size:11px;color:var(--text3);}
+.table-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;overflow-x:auto;}
+table{width:100%;border-collapse:collapse;}
+thead th{background:var(--primary);color:#fff;font-size:11px;font-weight:500;padding:10px 6px;text-align:center;border-right:1px solid rgba(255,255,255,.18);line-height:1.4;}
+thead th:last-child{border-right:none;}
+thead th.th-total{background:var(--primary-dk);}
+tbody tr{border-bottom:1px solid var(--border);}
+tbody tr:last-child{border-bottom:none;}
+tbody tr.sun{background:#fff5f5;}
+tbody tr.sat{background:#f5f8ff;}
+tbody tr.earn{background:#fffbf2;}
+tbody tr.sun.earn{background:#fff0e8;}
+tbody td{padding:5px 3px;text-align:center;vertical-align:middle;border-right:1px solid var(--border);font-size:13px;}
+tbody td:last-child{border-right:none;}
+.td-d{font-weight:700;font-family:'DM Mono',monospace;font-size:14px;width:34px;}
+.td-w{width:24px;font-size:12px;}
+.sun .td-w,.sun .td-d{color:var(--red);}
+.sat .td-w,.sat .td-d{color:#2980b9;}
+.td-tot{font-family:'DM Mono',monospace;font-weight:700;color:var(--primary-dk);width:76px;}
+.ed{color:var(--text3);}
+.cc{display:flex;flex-direction:column;align-items:center;gap:2px;padding:2px;}
+.cr{display:flex;align-items:center;gap:4px;}
+.cb{width:27px;height:27px;border-radius:7px;border:1px solid var(--border);background:var(--surface);cursor:pointer;font-size:16px;font-weight:700;display:flex;align-items:center;justify-content:center;color:var(--text2);transition:all .12s;line-height:1;padding:0;}
+.cb:not(:disabled):hover{background:var(--primary-lt);color:var(--primary);border-color:var(--primary);}
+.cb.mi:not(:disabled):hover{background:#fff0ee;color:var(--red);border-color:var(--red);}
+.cb:disabled{opacity:.28;cursor:default;}
+.cn{font-family:'DM Mono',monospace;font-size:16px;font-weight:700;min-width:20px;text-align:center;}
+.cn.nz{color:var(--primary);}
+.ca{font-size:10px;font-family:'DM Mono',monospace;color:var(--text3);min-height:12px;}
+.ca.nz{color:var(--primary-dk);font-weight:500;}
+.dots{display:flex;gap:3px;min-height:7px;}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--primary);opacity:.2;}
+.dot.on{opacity:1;}
+/* Checkbox cell (max=1) */
+.chk-cell{display:flex;flex-direction:column;align-items:center;gap:2px;padding:3px;}
+.chk-box{width:30px;height:30px;border-radius:8px;border:2px solid var(--border);background:var(--surface);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;}
+.chk-box:hover{border-color:var(--primary);background:var(--primary-lt);}
+.chk-box.checked{background:var(--primary);border-color:var(--primary);}
+.chk-box svg{display:none;}
+.chk-box.checked svg{display:block;}
+.chk-amt{font-size:10px;font-family:'DM Mono',monospace;color:var(--text3);min-height:12px;}
+.chk-amt.nz{color:var(--primary-dk);font-weight:500;}
+tfoot tr{background:var(--primary-lt);}
+tfoot td{padding:11px 6px;font-weight:700;font-size:12px;border-top:2px solid var(--primary);border-right:1px solid var(--border);text-align:center;color:var(--primary-dk);}
+tfoot td:last-child{border-right:none;}
+.ft{font-family:'DM Mono',monospace;font-size:14px;}
+.modal-ov{position:fixed;inset:0;background:rgba(0,0,0,.42);z-index:100;display:none;align-items:center;justify-content:center;}
+.modal-ov.open{display:flex;}
+.modal{background:var(--surface);border-radius:var(--r);padding:24px 28px;width:340px;max-width:92vw;}
+.modal-title{font-size:16px;font-weight:700;margin-bottom:18px;}
+.mf{margin-bottom:14px;}
+.ml{font-size:12px;color:var(--text2);margin-bottom:6px;}
+.mi-inp{font-family:'Noto Sans KR',sans-serif;font-size:14px;width:100%;border:1px solid var(--border);border-radius:8px;padding:8px 12px;outline:none;background:var(--bg);}
+.mi-inp:focus{border-color:var(--primary);}
+.modal-btns{display:flex;gap:8px;justify-content:flex-end;margin-top:20px;}
+.ep{font-size:28px;cursor:pointer;border:1px solid var(--border);border-radius:8px;padding:6px 14px;background:var(--bg);line-height:1;}
+.toast{position:fixed;bottom:24px;right:24px;background:var(--primary-dk);color:#fff;padding:10px 18px;border-radius:8px;font-size:13px;opacity:0;transition:opacity .3s;pointer-events:none;z-index:999;}
+.toast.show{opacity:1;}
+@media print{
+  .header,.controls{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  .controls{position:static;}
+  .btn,.header-btns,.goal-inp,.del-btn,.emoji-btn{display:none!important;}
+  body{background:#fff;}
+  .toast,.modal-ov,.emoji-picker{display:none!important;}
+}
+input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;}
+input[type=number]{-moz-appearance:textfield;}
+</style>
+</head>
+<body>
+<header class="header">
+  <div class="header-inner">
+    <div class="logo"><span class="logo-icon">🪙</span><span class="logo-text">용돈 계산기<span class="logo-sub">열심히 하면 용돈이 쑥쑥!</span></span></div>
+    <div class="header-btns">
+      <button class="btn btn-glass" onclick="window.print()">🖨 인쇄</button>
+      <button class="btn btn-glass" onclick="clearMonth()">초기화</button>
+    </div>
+  </div>
+</header>
+
+<div class="controls">
+  <div class="controls-inner">
+    <div class="month-nav">
+      <button class="nav-btn" onclick="chM(-1)">&#8249;</button>
+      <div class="month-label" id="mLabel"></div>
+      <button class="nav-btn" onclick="chM(1)">&#8250;</button>
+    </div>
+    <div class="goal-wrap">
+      <span class="goal-lbl">🎯 이달 목표</span>
+      <input class="goal-inp" type="number" id="goalInp" value="30000" step="1000" min="0" onchange="onGoal()">
+      <span class="goal-unit">원</span>
+    </div>
+  </div>
+</div>
+
+<div class="emoji-picker" id="ep"></div>
+
+<div class="body-wrap">
+  <div class="task-panel">
+    <div class="panel-header">
+      <span class="panel-title">📋 항목 설정<span class="panel-hint">이름 · 1회 금액 · 하루 최대 횟수 수정 가능</span></span>
+      <button class="btn btn-green" onclick="openModal()">＋ 항목 추가</button>
+    </div>
+    <div class="task-rows" id="taskRows"></div>
+  </div>
+
+  <div class="sum-top">
+    <div class="sum-card big"><div class="sum-lbl">이달 총 용돈</div><div class="sum-val" id="sTotal">0원</div><div class="sum-sub" id="sDays">아직 활동 없음</div></div>
+    <div class="sum-card"><div class="sum-lbl">총 활동 횟수</div><div class="sum-val" id="sCount">0회</div><div class="sum-sub">이번 달 합계</div></div>
+    <div class="sum-card"><div class="sum-lbl">가장 많이 한 일</div><div class="sum-val" id="sTop" style="font-size:16px;">—</div><div class="sum-sub" id="sTopSub">이달 기준</div></div>
+    <div class="sum-card"><div class="sum-lbl">목표까지 남은 금액</div><div class="sum-val" id="sRem">—</div><div class="sum-sub" id="sRemSub"></div></div>
+  </div>
+
+  <div class="progress-card">
+    <div class="progress-header"><span class="progress-title" id="pTitle">목표 달성률</span><span class="progress-pct" id="pPct">0%</span></div>
+    <div class="progress-bar-bg"><div class="progress-bar" id="pBar" style="width:0%"></div></div>
+    <div class="progress-sub"><span id="pL">0원 달성</span><span id="pR">목표 0원</span></div>
+  </div>
+
+  <div class="item-sum" id="itemSum"></div>
+
+  <div class="table-wrap">
+    <table><thead id="thead"></thead><tbody id="tbody"></tbody><tfoot id="tfoot"></tfoot></table>
+  </div>
+</div>
+
+<div class="modal-ov" id="mOv" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="modal">
+    <div class="modal-title">➕ 새 항목 추가</div>
+    <div class="mf"><div class="ml">아이콘 (클릭해서 변경)</div><button class="ep" id="mEmoji" onclick="openEmojiModal()">⭐</button></div>
+    <div class="mf"><div class="ml">항목 이름</div><input class="mi-inp" id="mName" type="text" placeholder="예: 설거지하기"></div>
+    <div class="mf"><div class="ml">1회당 금액 (원)</div><input class="mi-inp" id="mAmt" type="number" value="1000" step="100" min="0"></div>
+    <div class="mf"><div class="ml">하루 최대 횟수</div><input class="mi-inp" id="mMax" type="number" value="1" step="1" min="1" max="10"></div>
+    <div class="modal-btns">
+      <button class="btn" style="background:var(--surface2);color:var(--text2);" onclick="document.getElementById('mOv').classList.remove('open')">취소</button>
+      <button class="btn btn-orange" onclick="addTask()">추가하기</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const SK='yongdon-v2';
+const DK=['일','월','화','수','목','금','토'];
+const EMOJIS=['🧹','👕','🍳','🎮','📚','🛁','🐶','🌿','🧺','🛒','🪥','🍱','💪','🎨','🎵','📖','🏃','🌟','⭐','💎','🔑','🧽','🪣','🧴','🍜','🥗','🍎','🎒','✏️','🖍️','🫧','🫙'];
+
+let S={
+  year:new Date().getFullYear(), month:new Date().getMonth()+1, goal:30000,
+  tasks:[
+    {id:'clean', icon:'🧹', name:'청소하기',       amt:1000, max:1},
+    {id:'laundry',icon:'👕', name:'빨래정리',        amt:1000, max:1},
+    {id:'meal',  icon:'🍳', name:'식사준비',        amt:1000, max:3},
+    {id:'play',  icon:'🎮', name:'하율이 놀아주기', amt:1000, max:1},
+  ],
+  records:{}
+};
+
+function load(){try{const r=localStorage.getItem(SK);if(!r)return;const d=JSON.parse(r);if(d.goal!=null)S.goal=d.goal;if(d.tasks&&d.tasks.length)S.tasks=d.tasks;if(d.records)S.records=d.records;}catch(e){}}
+function save(){try{localStorage.setItem(SK,JSON.stringify({goal:S.goal,tasks:S.tasks,records:S.records}));}catch(e){}toast('저장됨 ✓');}
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),1500);}
+function rk(y,m,d,tid){return`${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}-${tid}`;}
+function days(y,m){return new Date(y,m,0).getDate();}
+function dow(y,m,d){return new Date(y,m-1,d).getDay();}
+function won(n){return n.toLocaleString()+'원';}
+function uid(){return 't'+Date.now()+Math.floor(Math.random()*999);}
+
+/* Emoji picker */
+let ET=null;
+document.getElementById('ep').innerHTML=EMOJIS.map(e=>`<button class="emoji-opt" onclick="pickE('${e}')">${e}</button>`).join('');
+function openEmojiRow(i,btn){ET={type:'row',idx:i};showEP(btn);}
+function openEmojiModal(){ET={type:'modal'};showEP(document.getElementById('mEmoji'));}
+function showEP(el){const p=document.getElementById('ep'),r=el.getBoundingClientRect();p.style.top=(r.bottom+window.scrollY+6)+'px';p.style.left=Math.min(r.left+window.scrollX,window.innerWidth-270)+'px';p.classList.add('open');}
+function pickE(e){if(!ET)return;if(ET.type==='row'){S.tasks[ET.idx].icon=e;save();render();}else document.getElementById('mEmoji').textContent=e;document.getElementById('ep').classList.remove('open');ET=null;}
+document.addEventListener('click',ev=>{const p=document.getElementById('ep');if(!p.contains(ev.target)&&!ev.target.classList.contains('emoji-btn')&&ev.target.id!=='mEmoji')p.classList.remove('open');});
+
+/* Task rows */
+function renderRows(){
+  document.getElementById('taskRows').innerHTML=S.tasks.map((t,i)=>`
+    <div class="task-row">
+      <button class="emoji-btn" onclick="openEmojiRow(${i},this)" title="아이콘 변경">${t.icon}</button>
+      <input class="task-name-inp" type="text" value="${t.name.replace(/"/g,'&quot;')}" data-i="${i}" onchange="tf(this,'name')">
+      <span class="fl">1회</span>
+      <input class="task-num-inp" type="number" value="${t.amt}" min="0" step="100" data-i="${i}" onchange="tf(this,'amt')">
+      <span class="fl">원</span>
+      <button class="del-btn" onclick="delTask(${i})" title="항목 삭제">✕</button>
+    </div>`).join('');}
+function tf(el,f){const i=+el.dataset.i;S.tasks[i][f]=f==='name'?el.value:(parseInt(el.value)||0);if(f==='max'&&S.tasks[i].max<1)S.tasks[i].max=1;save();renderMonth();}
+function delTask(i){if(!confirm(`"${S.tasks[i].name}" 항목을 삭제할까요?`))return;const tid=S.tasks[i].id;Object.keys(S.records).forEach(k=>{if(k.includes('-'+tid))delete S.records[k];});S.tasks.splice(i,1);save();render();}
+
+/* Modal */
+function openModal(){document.getElementById('mEmoji').textContent='⭐';document.getElementById('mName').value='';document.getElementById('mAmt').value=1000;document.getElementById('mMax').value=1;document.getElementById('mOv').classList.add('open');}
+function addTask(){const name=document.getElementById('mName').value.trim();if(!name){alert('항목 이름을 입력해주세요.');return;}S.tasks.push({id:uid(),icon:document.getElementById('mEmoji').textContent,name,amt:parseInt(document.getElementById('mAmt').value)||1000,max:Math.max(1,parseInt(document.getElementById('mMax').value)||1)});document.getElementById('mOv').classList.remove('open');save();render();}
+
+/* Counter ops */
+function getCnt(y,m,d,tid){return S.records[rk(y,m,d,tid)]||0;}
+function setCnt(y,m,d,tid,bi,max){const k=rk(y,m,d,tid),cur=S.records[k]||0,nxt=bi<cur?bi:bi+1;if(nxt<=0)delete S.records[k];else S.records[k]=Math.min(nxt,max);save();renderMonth();}
+
+/* Render month */
+function renderMonth(){
+  const y=S.year,m=S.month,n=days(y,m);
+  document.getElementById('mLabel').textContent=`${y}년 ${m}월`;
+  document.getElementById('goalInp').value=S.goal;
+  renderRows();
+
+  document.getElementById('thead').innerHTML=`<tr>
+    <th style="width:34px;">날짜</th><th style="width:24px;">요일</th>
+    ${S.tasks.map(t=>`<th>${t.icon}<br>${t.name}</th>`).join('')}
+    <th class="th-total">일 합계</th></tr>`;
+
+  const tC=S.tasks.map(()=>0),tW=S.tasks.map(()=>0);
+  let totW=0,totCk=0,actD=0,rows='';
+
+  for(let d=1;d<=n;d++){
+    const dw=dow(y,m,d);let dayW=0;
+    const cells=S.tasks.map((t,ti)=>{
+      const cnt=getCnt(y,m,d,t.id),earn=cnt*t.amt;
+      dayW+=earn;tC[ti]+=cnt;tW[ti]+=earn;totCk+=cnt;
+      const svg=`<svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8l4 4 6-6" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+      const boxes=Array.from({length:t.max},(_,bi)=>{
+        const on=bi<cnt;
+        return`<div class="chk-box${on?' checked':''}" onclick="setCnt(${y},${m},${d},'${t.id}',${bi},${t.max})">${svg}</div>`;
+      }).join('');
+      return`<td><div class="chk-cell">
+        <div style="display:flex;gap:4px;justify-content:center;">${boxes}</div>
+        <span class="chk-amt${cnt>0?' nz':''}">${cnt>0?won(earn):''}</span>
+      </div></td>`;
+    }).join('');
+    if(dayW>0)actD++;totW+=dayW;
+    const rc=[dw===0?'sun':dw===6?'sat':'',dayW>0?'earn':''].filter(Boolean).join(' ');
+    rows+=`<tr class="${rc}"><td class="td-d">${d}</td><td class="td-w">${DK[dw]}</td>${cells}<td class="td-tot">${dayW>0?`<span style="color:var(--primary-dk)">${won(dayW)}</span>`:'<span class="ed">—</span>'}</td></tr>`;
+  }
+  document.getElementById('tbody').innerHTML=rows;
+  document.getElementById('tfoot').innerHTML=`<tr><td colspan="2">월 합계</td>${S.tasks.map((_,ti)=>`<td class="ft">${tW[ti]>0?won(tW[ti]):'—'}</td>`).join('')}<td class="ft">${totW>0?won(totW):'—'}</td></tr>`;
+
+  // Summary
+  document.getElementById('sTotal').textContent=won(totW);
+  document.getElementById('sDays').textContent=actD>0?`${actD}일 활동`:'아직 활동 없음';
+  document.getElementById('sCount').textContent=totCk+'회';
+  const mx=Math.max(...tC,0);
+  if(mx>0){const ti=tC.indexOf(mx);document.getElementById('sTop').textContent=S.tasks[ti].icon+' '+S.tasks[ti].name;document.getElementById('sTopSub').textContent=`${mx}회 (${won(tW[ti])})`;}
+  else{document.getElementById('sTop').textContent='—';document.getElementById('sTopSub').textContent='이달 기준';}
+  const rem=S.goal-totW;
+  document.getElementById('sRem').textContent=rem>0?won(rem):'🎉 달성!';
+  document.getElementById('sRemSub').textContent=rem>0?`목표 ${won(S.goal)} 기준`:`+${won(-rem)} 초과!`;
+  const pct=S.goal>0?Math.min(100,Math.round(totW/S.goal*100)):0;
+  const pBar=document.getElementById('pBar');
+  document.getElementById('pPct').textContent=pct+'%';
+  pBar.style.width=pct+'%';
+  pBar.style.background=pct>=100?'linear-gradient(90deg,#27ae60,#2ecc71)':'linear-gradient(90deg,#f39c12,#e67e22)';
+  document.getElementById('pTitle').textContent=pct>=100?'🎉 목표 달성!':'목표 달성률';
+  document.getElementById('pL').textContent=won(totW)+' 달성';
+  document.getElementById('pR').textContent='목표 '+won(S.goal);
+  document.getElementById('itemSum').innerHTML=S.tasks.map((t,ti)=>`<div class="item-badge"><span>${t.icon}</span><span>${t.name}</span><span class="ib-cnt">${tC[ti]}회</span><span class="ib-pay">${won(tW[ti])}</span></div>`).join('');
+}
+
+function render(){renderMonth();}
+function chM(d){S.month+=d;if(S.month>12){S.month=1;S.year++;}if(S.month<1){S.month=12;S.year--;}render();}
+function onGoal(){S.goal=parseInt(document.getElementById('goalInp').value)||0;save();renderMonth();}
+function clearMonth(){if(!confirm(`${S.year}년 ${S.month}월 기록을 모두 삭제할까요?`))return;const p=`${S.year}-${String(S.month).padStart(2,'0')}-`;Object.keys(S.records).forEach(k=>{if(k.startsWith(p))delete S.records[k];});save();renderMonth();}
+
+load();render();
+</script>
+</body>
+</html>
